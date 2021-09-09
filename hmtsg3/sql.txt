@@ -1,0 +1,496 @@
+
+--vip活动商品售卖
+
+hive -e"
+select '7/12-7/15' daterange,t1.vip,'1' timerange,item_id,
+case when item_id='90001' then '普通基金' 
+when item_id='90002' then '超值基金' 
+when item_id='90003' then '豪華基金' end as item_name,
+buytimes,buyusers,nvl(allbuyusers,0) allbuyusers,arppu
+from(
+select vip,item_id,count(distinct group_id,pid) buytimes,count(*) buyusers
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and (item_id='90001' or item_id='90002' or item_id='90003')
+and ds>='2021-07-12'
+and ds<='2021-07-15'
+group by vip,item_id) t1
+left join(
+select vip,count(distinct group_id,pid) allbuyusers
+from(
+select t3.vip,t3.group_id,t3.pid
+from(
+select group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='90001'
+and ds>='2021-07-12'
+and ds<='2021-07-15') t1 
+join(
+select group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='90002'
+and ds>='2021-07-12'
+and ds<='2021-07-15') t2 
+on t1.group_id=t2.group_id and t1.pid=t2.pid
+join(
+select vip,group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='90003'
+and ds>='2021-07-12'
+and ds<='2021-07-15') t3 
+on t1.group_id=t3.group_id and t1.pid=t3.pid) t1
+group by vip) t2 
+on t1.vip=t2.vip
+left join(
+select vip,round(total/pu,2) arppu
+from(
+select vip,count(distinct group_id,pid) pu,sum(true_cost) total
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and ds>='2021-07-12'
+and ds<='2021-07-15'
+group by vip) t1) t3 
+on t1.vip=t3.vip
+union all
+select '7/23-7/26' daterange,t1.vip,'2' timerange,item_id,
+case when item_id='90001' then '普通基金' 
+when item_id='90002' then '超值基金' 
+when item_id='90003' then '豪華基金' end as item_name,
+buytimes,buyusers,nvl(allbuyusers,0) allbuyusers,arppu
+from(
+select vip,item_id,count(distinct group_id,pid) buytimes,count(*) buyusers
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and (item_id='90001' or item_id='90002' or item_id='90003')
+and ds>='2021-07-23'
+and ds<='2021-07-26'
+group by vip,item_id) t1
+left join(
+select vip,count(distinct group_id,pid) allbuyusers
+from(
+select t3.vip,t3.group_id,t3.pid
+from(
+select group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='90001'
+and ds>='2021-07-23'
+and ds<='2021-07-26') t1 
+join(
+select group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='90002'
+and ds>='2021-07-23'
+and ds<='2021-07-26') t2 
+on t1.group_id=t2.group_id and t1.pid=t2.pid
+join(
+select vip,group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='90003'
+and ds>='2021-07-23'
+and ds<='2021-07-26') t3 
+on t1.group_id=t3.group_id and t1.pid=t3.pid) t1
+group by vip) t2 
+on t1.vip=t2.vip
+left join(
+select vip,round(total/pu,2) arppu
+from(
+select vip,count(distinct group_id,pid) pu,sum(true_cost) total
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and ds>='2021-07-23'
+and ds<='2021-07-26'
+group by vip) t1) t3 
+on t1.vip=t3.vip
+union all
+select '8/4-8/7' daterange,t1.vip,'3' timerange,item_id,
+case when item_id='90001' then '普通基金' 
+when item_id='90002' then '超值基金' 
+when item_id='90003' then '豪華基金' end as item_name,
+buytimes,buyusers,nvl(allbuyusers,0) allbuyusers,arppu
+from(
+select vip,item_id,count(distinct group_id,pid) buytimes,count(*) buyusers
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and (item_id='90001' or item_id='90002' or item_id='90003')
+and ds>='2021-08-04'
+and ds<='2021-08-07'
+group by vip,item_id) t1
+left join(
+select vip,count(distinct group_id,pid) allbuyusers
+from(
+select t3.vip,t3.group_id,t3.pid
+from(
+select group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='90001'
+and ds>='2021-08-04'
+and ds<='2021-08-07') t1 
+join(
+select group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='90002'
+and ds>='2021-08-04'
+and ds<='2021-08-07') t2 
+on t1.group_id=t2.group_id and t1.pid=t2.pid
+join(
+select vip,group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='90003'
+and ds>='2021-08-04'
+and ds<='2021-08-07') t3 
+on t1.group_id=t3.group_id and t1.pid=t3.pid) t1
+group by vip) t2 
+on t1.vip=t2.vip
+left join(
+select vip,round(total/pu,2) arppu
+from(
+select vip,count(distinct group_id,pid) pu,sum(true_cost) total
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and ds>='2021-08-04'
+and ds<='2021-08-07'
+group by vip) t1) t3 
+on t1.vip=t3.vip
+union all
+select '8/23-8/26' daterange,t1.vip,'4' timerange,item_id,
+case when item_id='90001' then '普通基金' 
+when item_id='90002' then '超值基金' 
+when item_id='90003' then '豪華基金' end as item_name,
+buytimes,buyusers,nvl(allbuyusers,0) allbuyusers,arppu
+from(
+select vip,item_id,count(distinct group_id,pid) buytimes,count(*) buyusers
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and (item_id='90001' or item_id='90002' or item_id='90003')
+and ds>='2021-08-23'
+and ds<='2021-08-26'
+group by vip,item_id) t1
+left join(
+select vip,count(distinct group_id,pid) allbuyusers
+from(
+select t3.vip,t3.group_id,t3.pid
+from(
+select group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='90001'
+and ds>='2021-08-23'
+and ds<='2021-08-26') t1 
+join(
+select group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='90002'
+and ds>='2021-08-23'
+and ds<='2021-08-26') t2 
+on t1.group_id=t2.group_id and t1.pid=t2.pid
+join(
+select vip,group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='90003'
+and ds>='2021-08-23'
+and ds<='2021-08-26') t3 
+on t1.group_id=t3.group_id and t1.pid=t3.pid) t1
+group by vip) t2 
+on t1.vip=t2.vip
+left join(
+select vip,round(total/pu,2) arppu
+from(
+select vip,count(distinct group_id,pid) pu,sum(true_cost) total
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and ds>='2021-08-23'
+and ds<='2021-08-26'
+group by vip) t1) t3 
+on t1.vip=t3.vip
+union all
+select '9/1-9/4' daterange,t1.vip,'5' timerange,item_id,
+case when item_id='90001' then '普通基金' 
+when item_id='90002' then '超值基金' 
+when item_id='90003' then '豪華基金' end as item_name,
+buytimes,buyusers,nvl(allbuyusers,0) allbuyusers,arppu
+from(
+select vip,item_id,count(distinct group_id,pid) buytimes,count(*) buyusers
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and (item_id='90001' or item_id='90002' or item_id='90003')
+and ds>='2021-09-01'
+and ds<='2021-09-04'
+group by vip,item_id) t1
+left join(
+select vip,count(distinct group_id,pid) allbuyusers
+from(
+select t3.vip,t3.group_id,t3.pid
+from(
+select group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='90001'
+and ds>='2021-09-01'
+and ds<='2021-09-04') t1 
+join(
+select group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='90002'
+and ds>='2021-09-01'
+and ds<='2021-09-04') t2 
+on t1.group_id=t2.group_id and t1.pid=t2.pid
+join(
+select vip,group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='90003'
+and ds>='2021-09-01'
+and ds<='2021-09-04') t3 
+on t1.group_id=t3.group_id and t1.pid=t3.pid) t1
+group by vip) t2 
+on t1.vip=t2.vip
+left join(
+select vip,round(total/pu,2) arppu
+from(
+select vip,count(distinct group_id,pid) pu,sum(true_cost) total
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and ds>='2021-09-01'
+and ds<='2021-09-04'
+group by vip) t1) t3 
+on t1.vip=t3.vip;" >>/tmp/hmtsg3_1.txt
+
+
+
+
+hive -e"
+select '7/6-7/9' daterange,t1.vip,'1' timerange,item_id,
+case when item_id='70001' then '月基金：普通基金' 
+when item_id='70002' then '月基金：豪華基金' end as item_name,
+buytimes,buyusers,nvl(allbuyusers,0) allbuyusers,arppu
+from(
+select vip,item_id,count(distinct group_id,pid) buytimes,count(*) buyusers
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and (item_id='70001' or item_id='70002')
+and ds>='2021-07-06'
+and ds<='2021-07-09'
+group by vip,item_id) t1
+left join(
+select vip,count(distinct group_id,pid) allbuyusers
+from(
+select t3.vip,t3.group_id,t3.pid
+from(
+select group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='70001'
+and ds>='2021-07-06'
+and ds<='2021-07-09') t1 
+join(
+select vip,group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='70002'
+and ds>='2021-07-06'
+and ds<='2021-07-09') t3 
+on t1.group_id=t3.group_id and t1.pid=t3.pid) t1
+group by vip) t2 
+on t1.vip=t2.vip
+left join(
+select vip,round(total/pu,2) arppu
+from(
+select vip,count(distinct group_id,pid) pu,sum(true_cost) total
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and ds>='2021-07-06'
+and ds<='2021-07-09'
+group by vip) t1) t3 
+on t1.vip=t3.vip
+union all
+select '7/30-8/2' daterange,t1.vip,'2' timerange,item_id,
+case when item_id='70001' then '月基金：普通基金' 
+when item_id='70002' then '月基金：豪華基金' end as item_name,
+buytimes,buyusers,nvl(allbuyusers,0) allbuyusers,arppu
+from(
+select vip,item_id,count(distinct group_id,pid) buytimes,count(*) buyusers
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and (item_id='70001' or item_id='70002')
+and ds>='2021-07-30'
+and ds<='2021-08-02'
+group by vip,item_id) t1
+left join(
+select vip,count(distinct group_id,pid) allbuyusers
+from(
+select t3.vip,t3.group_id,t3.pid
+from(
+select group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='70001'
+and ds>='2021-07-30'
+and ds<='2021-08-02') t1 
+join(
+select vip,group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='70002'
+and ds>='2021-07-30'
+and ds<='2021-08-02') t3 
+on t1.group_id=t3.group_id and t1.pid=t3.pid) t1
+group by vip) t2 
+on t1.vip=t2.vip
+left join(
+select vip,round(total/pu,2) arppu
+from(
+select vip,count(distinct group_id,pid) pu,sum(true_cost) total
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and ds>='2021-07-30'
+and ds<='2021-08-02'
+group by vip) t1) t3 
+on t1.vip=t3.vip
+union all
+select '8/16-8/19' daterange,t1.vip,'3' timerange,item_id,
+case when item_id='70001' then '月基金：普通基金' 
+when item_id='70002' then '月基金：豪華基金' end as item_name,
+buytimes,buyusers,nvl(allbuyusers,0) allbuyusers,arppu
+from(
+select vip,item_id,count(distinct group_id,pid) buytimes,count(*) buyusers
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and (item_id='70001' or item_id='70002')
+and ds>='2021-08-16'
+and ds<='2021-08-19'
+group by vip,item_id) t1
+left join(
+select vip,count(distinct group_id,pid) allbuyusers
+from(
+select t3.vip,t3.group_id,t3.pid
+from(
+select group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='70001'
+and ds>='2021-08-16'
+and ds<='2021-08-19') t1 
+join(
+select vip,group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='70002'
+and ds>='2021-08-16'
+and ds<='2021-08-19') t3 
+on t1.group_id=t3.group_id and t1.pid=t3.pid) t1
+group by vip) t2 
+on t1.vip=t2.vip
+left join(
+select vip,round(total/pu,2) arppu
+from(
+select vip,count(distinct group_id,pid) pu,sum(true_cost) total
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and ds>='2021-08-16'
+and ds<='2021-08-19'
+group by vip) t1) t3 
+on t1.vip=t3.vip
+union all
+select '9/3-9/6' daterange,t1.vip,'4' timerange,item_id,
+case when item_id='70001' then '月基金：普通基金' 
+when item_id='70002' then '月基金：豪華基金' end as item_name,
+buytimes,buyusers,nvl(allbuyusers,0) allbuyusers,arppu
+from(
+select vip,item_id,count(distinct group_id,pid) buytimes,count(*) buyusers
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and (item_id='70001' or item_id='70002')
+and ds>='2021-09-03'
+and ds<='2021-09-06'
+group by vip,item_id) t1
+left join(
+select vip,count(distinct group_id,pid) allbuyusers
+from(
+select t3.vip,t3.group_id,t3.pid
+from(
+select group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='70001'
+and ds>='2021-09-03'
+and ds<='2021-09-06') t1 
+join(
+select vip,group_id,pid
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and item_id='70002'
+and ds>='2021-09-03'
+and ds<='2021-09-06') t3 
+on t1.group_id=t3.group_id and t1.pid=t3.pid) t1
+group by vip) t2 
+on t1.vip=t2.vip
+left join(
+select vip,round(total/pu,2) arppu
+from(
+select vip,count(distinct group_id,pid) pu,sum(true_cost) total
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and ds>='2021-09-03'
+and ds<='2021-09-06'
+group by vip) t1) t3 
+on t1.vip=t3.vip;" >>/tmp/hmtsg3_2.txt
+
+
+
+
+hive -e"
+select t1.ds,t1.vip,item_id,buytimes,buyusers,arppu
+from(
+select ds,vip,item_id,count(distinct group_id,pid) buytimes,count(*) buyusers
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and cast(item_id as int) >= 80447
+and cast(item_id as int) <= 80648
+and ds>='2021-07-01'
+and ds<='2021-09-06'
+group by vip,item_id,ds) t1
+left join(
+select ds,vip,round(total/pu,2) arppu
+from(
+select ds,vip,count(distinct group_id,pid) pu,sum(true_cost) total
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and ds>='2021-07-01'
+and ds<='2021-09-06'
+group by vip,ds) t1) t3 
+on t1.vip=t3.vip and t1.ds=t3.ds;" >> /tmp/hmtsg3_3.txt
+
+
+hive -e"
+select t1.ds,t1.vip,item_id,buytimes,buyusers,arppu
+from(
+select ds,vip,item_id,count(distinct group_id,pid) buytimes,count(*) buyusers
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and cast(item_id as int) >= 22381
+and cast(item_id as int) <= 22585
+and ds>='2021-07-01'
+and ds<='2021-09-06'
+group by vip,item_id,ds) t1
+left join(
+select ds,vip,round(total/pu,2) arppu
+from(
+select ds,vip,count(distinct group_id,pid) pu,sum(true_cost) total
+from mysql_db.t_ioshunfu_order_copy 
+where gn='hmtsg3' 
+and ds>='2021-07-01'
+and ds<='2021-09-06'
+group by vip,ds) t1) t3 
+on t1.vip=t3.vip and t1.ds=t3.ds;" >> /tmp/hmtsg3_4.txt
