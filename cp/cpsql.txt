@@ -2,6 +2,7 @@
 --8月30-31日有过登录行为的用户 qid pid 8月内充值金额汇总 vip等级 角色等级 以及他们在9月1-2日 是否有登陆行为
 --有登陆行为标记“1”无登陆行为标记“0”
 
+
 mysql -h192.168.4.230 -urd -padmin -A -e"
 select t1.serverid,qid,t1.pid,ifnull(total,0) totalmoney,vip,level,ifnull(flag,'0') if_login
 from(
