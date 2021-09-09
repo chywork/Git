@@ -1,0 +1,67 @@
+-- ios大区9月7日的核心用户中，在9月8日未成为核心用户的角色信息：server_id、pid、level、vip、最后登录时间、ip
+
+hive -e"
+set mapreduce.map.memory.mb=8192;
+set mapreduce.reduce.memory.mb=8192;
+set mapred.child.java.opts=-Xmx3584m;
+set hive.cli.print.header=true;
+set hive.resultset.use.unique.column.names=false;
+
+ADD JAR /home/pirate/project/flow/jars/long-to-ip.jar;
+CREATE TEMPORARY FUNCTION longtoip AS 'com.babeltime.LongToIp';
+
+select
+z1.pid,z1.server_id,vip,level,login_time,ip 
+from 
+(
+select 
+distinct pid,server_id
+from 
+(
+select 
+pid,server_id,ds,max(score) as score  
+from ods.coreuser
+where gn='sg3'
+and ds='2021-09-07'
+and server_id>=3010000 
+and server_id<3020000 
+group by pid,server_id,ds
+) a 
+where a.score>=100
+)  z1 
+left join 
+(
+select 
+distinct pid,server_id
+from 
+(
+select 
+pid,server_id,ip,max(score) as score  
+from ods.coreuser
+where gn='sg3'
+and ds='2021-09-08'
+and server_id>=3010000 
+and server_id<3020000 
+group by pid,server_id,ip
+) a 
+where a.score>=100
+) z2 
+on z1.pid=z2.pid and z1.server_id=z2.server_id
+left join 
+(
+select 
+pid,server_id,vip,level,longtoip(cast (ip as bigint)) as ip,from_unixtime(login_time,'yyyy-MM-dd HH:mm:ss') as login_time
+from 
+(
+select 
+pid,server_id,vip,level,ip,login_time
+,row_number() over(partition by pid,server_id order by login_time desc) as rk 
+from ods.role_logout
+where gn='sg3'
+and ds>='2021-09-01' 
+and ds<='2021-09-08'
+) a where a.rk=1 
+) z3 
+on z1.pid=z3.pid and z1.server_id=z3.server_id
+where z2.pid is null and z2.server_id is null
+">>/tmp/0909sg3.txt;
