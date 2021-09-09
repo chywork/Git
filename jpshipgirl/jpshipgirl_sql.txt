@@ -1,0 +1,60 @@
+####副本的伤害相关日志
+
+hive -e"
+select server_id,pid,ds,split(kv,'\,')[0]  copyid,
+split(kv,'\,')[3] shipgirl_battle,
+split(kv,'\,')[4] damage,
+split(kv,'\,')[5] shipgirl_id
+from ods.flow 
+where gn='jpshipgirl' 
+and method='copy.PassBase'
+and split(kv,'\,')[0] not like '%hero%'
+and split(kv,'\,')[0] ='60000'
+and ds >= '2021-05-28'
+and ds <= '2021-06-24';" >> /tmp/damage0604.txt
+
+####战斗结束时的逻辑端统计日志
+
+hive -e"
+select server_id,pid,ds,kv from ods.on_event_sdk
+where gn='jpshipgirl'
+and server_id=4500001
+and pid=20352
+and event_id='battle'
+and ds >= '2021-05-28'
+and ds <= '2021-06-24';" >> /tmp/battle0604.txt
+
+####副本结束时的逻辑端统计日志
+
+hive -e"
+select server_id,pid,ds,kv from ods.on_event_sdk
+where gn='jpshipgirl'
+and server_id=4500001
+and pid=20352
+and event_id='copy'
+and ds >= '2021-05-28'
+and ds <= '2021-06-24';" >> /tmp/copy0604.txt
+
+####lua端的结算界面日志
+
+hive -e"
+select server_id,pid,ds,kv from ods.on_event_sdk
+where gn='jpshipgirl'
+and server_id=4500001
+and pid=20352
+and event_id='ui_log'
+and get_json_object(kv,\"$.info\")='myshipgirls_battleinfo'
+and ds >= '2021-05-28'
+and ds <= '2021-06-24';" >> /tmp/uilog0604.txt
+
+####战斗结束时的epu输出日志
+
+hive -e"
+select server_id,pid,ds,kv from ods.on_event_sdk
+where gn='jpshipgirl'
+and server_id=4500001
+and pid=20352
+and event_id='battle_log'
+and get_json_object(kv,\"$.info\")='myshipgirls_battleinfo'
+and ds >= '2021-05-28'
+and ds <= '2021-06-24';" >> /tmp/battlelog0604.txt
