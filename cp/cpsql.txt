@@ -1,0 +1,30 @@
+--航海王iOS
+--8月30-31日有过登录行为的用户 qid pid 8月内充值金额汇总 vip等级 角色等级 以及他们在9月1-2日 是否有登陆行为
+--有登陆行为标记“1”无登陆行为标记“0”
+
+mysql -h192.168.4.230 -urd -padmin -A -e"
+select t1.serverid,qid,t1.pid,ifnull(total,0) totalmoney,vip,level,ifnull(flag,'0') if_login
+from(
+select distinct serverid,pid 
+from pirate_card_stat.day_login_info_202108
+where serverid like '7002%'
+and loginTime >= unix_timestamp('2021-08-30 00:00:00')
+and loginTime < unix_timestamp('2021-09-01 00:00:00')) t1 
+left join(
+select group_id,pid,sum(gameMoney/10) total 
+from pirate_card_stat.t_ioshunfu_order_copy_2021 
+where successtimestamp>=unix_timestamp('2021-08-01 00:00:00')
+and successtimestamp<unix_timestamp('2021-09-01 00:00:00')
+group by group_id,pid) t2 
+on t1.serverid=t2.group_id and t1.pid=t2.pid 
+left join(
+select server_id,pid,qid,level,vip 
+from pirate_card_stat.dms_userinfo) t3 
+on t1.serverid=t3.server_id and t1.pid=t3.pid 
+left join(
+select distinct serverid,pid,'1' flag
+from pirate_card_stat.day_login_info_202109
+where serverid like '7002%'
+and loginTime >= unix_timestamp('2021-09-01 00:00:00')
+and loginTime < unix_timestamp('2021-09-02 00:00:00')) t4
+on t1.serverid=t4.serverid and t1.pid=t4.pid;">>/tmp/cp0906.txt
