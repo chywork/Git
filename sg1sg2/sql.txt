@@ -1,0 +1,280 @@
+
+1、数据范围：
+巴别官方最游戏SDK客户端的玩家（接入最游戏SDK的客户端，包括苹果iOS客户端和安卓客户端）
+2、角色信息：
+服务器，PID，QID，角色名，VIP等级，年龄，最后登录时间。
+3、提取数据：
+A数据：2021年8月25日00:00-2021年8月31日23:59期间登陆过游戏，且年龄在1岁（含）到17岁（含）的角色信息。
+B数据：A数据里的角色，在2021年9月3日，4日，5日这三天时间里每天20:00-21:00期间登陆过游戏的角色信息。
+
+-------------------------------------------------sg1:
+
+mysql -h 192.168.7.33 -P 3306 -urd -padmin -A -e "
+set names utf8;
+select t1.serverid,t1.pid,qid,uname,vip,last_login_time,
+ifnull(login_09_03,'0') login_09_03,ifnull(login_09_04,'0') login_09_04,ifnull(login_09_05,'0') login_09_05
+from(
+select distinct serverid,pid 
+from sanguo_stat.day_login_info_202108
+where loginTime >= unix_timestamp('2021-08-25 00:00:00')
+and loginTime <= unix_timestamp('2021-08-31 23:59:59')
+and (pl='MJduomeng'  
+or pl='MJjimotianqi'  
+or pl='Mjbaiduyidongwang'  
+or pl='Mjjinshandianchi'  
+or pl='Mjanaochuanmei'  
+or pl='Mjlimei'  
+or pl='Mjjinritoutiao'  
+or pl='Mjfengxingshipin'  
+or pl='Mjsouhushipin'  
+or pl='Mjyoukushipin'  
+or pl='Mjxunleishipin'  
+or pl='Mjadmop'  
+or pl='Mjbaidupinzhuan'  
+or pl='Mjwanfawifi'  
+or pl='MJbeiyong1'  
+or pl='MJbeiyong2'  
+or pl='MJbeiyong3'  
+or pl='MJbeiyong4'  
+or pl='MJbeiyong5'  
+or pl='MJbeiyong6'  
+or pl='MJbeiyong7'  
+or pl='MJbeiyong8'  
+or pl='MJbeiyong9'  
+or pl='MJbeiyong10'  
+or pl='MJbeiyong11'  
+or pl='MJbeiyong12'  
+or pl='MJbeiyong13'  
+or pl='MJbeiyong14'  
+or pl='MJbeiyong15'  
+or pl='MJbeiyong16'  
+or pl='MJbeiyong17'  
+or pl='MJbeiyong18'  
+or pl='MJbeiyong19'  
+or pl='MJbeiyong20'  
+or pl='MJbeiyong21'  
+or pl='MJbeiyong22'  
+or pl='MJbeiyong23'  
+or pl='gwphone'  
+or pl='aiwangyou'  
+or pl='bfyyphone'  
+or pl='7k7k'  
+or pl='7K7K'  
+or pl='mojitianqi'  
+or pl='8684'  
+or pl='265g'  
+or pl='5g'  
+or pl='delixin'  
+or pl='HTC'  
+or pl='youxisanwei'  
+or pl='zuidadongman'  
+or pl='17shouyou'  
+or pl='wukongyouxi'  
+or pl='moqiyouxi'  
+or pl='kuhuyouxi'  
+or pl='youyi'  
+or pl='yayawan'  
+or pl='jiyouwang'  
+or pl='yiguowangluo'  
+or pl='duowan'  
+or pl='shizimao'  
+or pl='paokewang'  
+or pl='youku'  
+or pl='paojiao'  
+or pl='feitao'  
+or pl='tangguoyou'  
+or pl='youxigou'  
+or pl='zhangyuhudong'  
+or pl='7K7K2'  
+or pl='tongyou'  
+or pl='yiqilaiwan'  
+or pl='xinquyouxi'  
+or pl='zhongyu'  
+or pl='chuangwei'  
+or pl='dixintong'  
+or pl='tuhaoshouyou'  
+or pl='qianchiyouxidating'  
+or pl='ayhpone'  
+or pl='kunda'  
+or pl='fengxing'  
+or pl='shenmazhidewan'  
+or pl='kule'  
+or pl='baofeng'  
+or pl='douwan'  
+or pl='9Gyou'  
+or pl='yisou'  
+or pl='tianwan'  
+or pl='leiyusj'  
+or pl='jifengdianshi'  
+or pl='suningyigou'  
+or pl='youxitanzi'  
+or pl='qqhe'  
+or pl='anao'  
+or pl='jifengdianshi'  
+or pl='guomei'  
+or pl='jinli'  
+or pl='mianshangdian'  
+or pl='saizhong'  
+or pl='90youxi'  
+or pl='yezizhu'  
+or pl='weiyouhui'  
+or pl='kunda2'  
+or pl='nduo'  
+or pl='zhangyue'  
+or pl='shizimao1'  
+or pl='chongchongzs'  
+or pl='youxitiankong'  
+or pl='haoyu'  
+or pl='youxiqun'  
+or pl='youba'  
+or pl='shoujixiaoyouxi'  
+or pl='99wuxian'  
+or pl='meitiandianji'
+or pl='appstore')) t1 
+left join(
+select server_id,pid,qid,vip,uname,from_unixtime(last_login_time,'%Y-%m-%d %H:%i:%S') last_login_time
+from sanguo_stat.dms_userinfo) t2 
+on t1.serverid=t2.server_id and t1.pid=t2.pid
+left join(
+select distinct server_key,pid,'1' login_09_03
+from sanguo_stat.pirate_onlinetime_log_202109
+where login_time >= unix_timestamp('2021-09-03 20:00:00')
+and login_time <= unix_timestamp('2021-09-03 21:00:00')) t3
+on t1.serverid=t3.server_key and t1.pid=t3.pid
+left join(
+select distinct server_key,pid,'1' login_09_04
+from sanguo_stat.pirate_onlinetime_log_202109
+where login_time >= unix_timestamp('2021-09-04 20:00:00')
+and login_time <= unix_timestamp('2021-09-04 21:00:00')) t4
+on t1.serverid=t4.server_key and t1.pid=t4.pid
+left join(
+select distinct server_key,pid,'1' login_09_05
+from sanguo_stat.pirate_onlinetime_log_202109
+where login_time >= unix_timestamp('2021-09-05 20:00:00')
+and login_time <= unix_timestamp('2021-09-05 21:00:00')) t5
+on t1.serverid=t5.server_key and t1.pid=t5.pid;" >>/tmp/sg10907.txt
+
+
+
+
+-----------------------------------------------------------------------sg2
+
+
+mysql -h '192.168.9.216' -urd -padmin -A -e "
+set names utf8;
+select t1.serverid,t1.pid,qid,uname,vip,last_login_time,
+ifnull(login_09_03,'0') login_09_03,ifnull(login_09_04,'0') login_09_04,ifnull(login_09_05,'0') login_09_05
+from(
+select distinct serverid,pid 
+from xsg_stat.day_login_info_202108
+where loginTime >= unix_timestamp('2021-08-25 00:00:00')
+and loginTime <= unix_timestamp('2021-08-31 23:59:59')
+and (plosgn ='13'
+or plosgn ='37'
+or plosgn ='38'
+or plosgn ='39'
+or plosgn ='40'
+or plosgn ='41'
+or plosgn ='42'
+or plosgn ='43'
+or plosgn ='44'
+or plosgn ='45'
+or plosgn ='46'
+or plosgn ='47'
+or plosgn ='48'
+or plosgn ='49'
+or plosgn ='50'
+or plosgn ='51'
+or plosgn ='52'
+or plosgn ='53'
+or plosgn ='54'
+or plosgn ='55'
+or plosgn ='56'
+or plosgn ='57'
+or plosgn ='58'
+or plosgn ='59'
+or plosgn ='60'
+or plosgn ='61'
+or plosgn ='62'
+or plosgn ='63'
+or plosgn ='64'
+or plosgn ='65'
+or plosgn ='66'
+or plosgn ='67'
+or plosgn ='69'
+or plosgn ='70'
+or plosgn ='71'
+or plosgn ='75'
+or plosgn ='76'
+or plosgn ='77'
+or plosgn ='82'
+or plosgn ='83'
+or plosgn ='84'
+or plosgn ='85'
+or plosgn ='86'
+or plosgn ='87'
+or plosgn ='88'
+or plosgn ='89'
+or plosgn ='90'
+or plosgn ='91'
+or plosgn ='92'
+or plosgn ='93'
+or plosgn ='94'
+or plosgn ='95'
+or plosgn ='96'
+or plosgn ='97'
+or plosgn ='98'
+or plosgn ='99'
+or plosgn ='100'
+or plosgn ='115'
+or plosgn ='116'
+or plosgn ='101'
+or plosgn ='102'
+or plosgn ='103'
+or plosgn ='104'
+or plosgn ='105'
+or plosgn ='106'
+or plosgn ='107'
+or plosgn ='108'
+or plosgn ='109'
+or plosgn ='110'
+or plosgn ='111'
+or plosgn ='112'
+or plosgn ='113'
+or plosgn ='114'
+or plosgn ='119'
+or plosgn ='120'
+or plosgn ='121'
+or plosgn ='122'
+or plosgn ='123'
+or plosgn ='124'
+or plosgn ='125'
+or plosgn ='126'
+or plosgn ='127'
+or plosgn ='128'
+or plosgn ='129'
+or plosgn ='130'
+or plosgn ='16')) t1 
+left join(
+select server_id,pid,qid,vip,uname,from_unixtime(last_login_time,'%Y-%m-%d %H:%i:%S') last_login_time
+from xsg_stat.dms_userinfo) t2 
+on t1.serverid=t2.server_id and t1.pid=t2.pid
+left join(
+select distinct server_key,pid,'1' login_09_03
+from xsg_stat.pirate_onlinetime_log_202109
+where login_time >= unix_timestamp('2021-09-03 20:00:00')
+and login_time <= unix_timestamp('2021-09-03 21:00:00')) t3
+on t1.serverid=t3.server_key and t1.pid=t3.pid
+left join(
+select distinct server_key,pid,'1' login_09_04
+from xsg_stat.pirate_onlinetime_log_202109
+where login_time >= unix_timestamp('2021-09-04 20:00:00')
+and login_time <= unix_timestamp('2021-09-04 21:00:00')) t4
+on t1.serverid=t4.server_key and t1.pid=t4.pid
+left join(
+select distinct server_key,pid,'1' login_09_05
+from xsg_stat.pirate_onlinetime_log_202109
+where login_time >= unix_timestamp('2021-09-05 20:00:00')
+and login_time <= unix_timestamp('2021-09-05 21:00:00')) t5
+on t1.serverid=t5.server_key and t1.pid=t5.pid;" >>/tmp/sg20906.txt
+
