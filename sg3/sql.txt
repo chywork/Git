@@ -1,5 +1,4 @@
 -- ios大区9月7日的核心用户中，在9月8日未成为核心用户的角色信息：server_id、pid、level、vip、最后登录时间、ip
-
 hive -e"
 set mapreduce.map.memory.mb=8192;
 set mapreduce.reduce.memory.mb=8192;
