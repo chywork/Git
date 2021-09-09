@@ -1,0 +1,469 @@
+--樱落巫女限定池抽卡数据
+
+
+需求1：
+
+## 兑换明细：
+
+hive -e"
+set mapreduce.map.memory.mb=8192;
+set mapreduce.reduce.memory.mb=8192;
+set mapred.child.java.opts=-Xmx3584m;
+set hive.cli.print.header=true;
+set hive.resultset.use.unique.column.names=false;
+select *
+from(
+select a.server_id,a.pid,item,count(*) number
+from(
+select server_id,pid,
+case when data like'%1\\;11022\\;-5\"\,\"5\\;9\\;50%' then '高级装备兑换币'
+when data like'%1\\;11022\\;-30\"\,\"2\\;30581\\;1%' then '万能奥斯装备核心'
+when data like'%1\\;11022\\;-10\"\,\"1\\;168111\\;1%' then '深海回廊活动勋章'
+when data like'%1\\;11023\\;-15\"\,\"5\\;8\\;100%' then '装备兑换币'
+when data like'%1\\;11023\\;-15\"\,\"5\\;24\\;150%' then '舰队币'
+when data like'%1\\;11023\\;-15\"\,\"5\\;18\\;300%' then '功勋'
+when data like'%1\\;11023\\;-200\"\,\"1\\;10304\\;1%' then '奥斯机关拓展单元巡洋'
+when data like'%1\\;11023\\;-200\"\,\"1\\;10305\\;1%' then '奥斯机关拓展单元战列'
+when data like'%1\\;11023\\;-200\"\,\"1\\;10306\\;1%' then '奥斯机关拓展单元航母'
+when data like'%1\\;11023\\;-200\"\,\"1\\;10307\\;1%' then '奥斯机关拓展单元驱逐'
+when data like'%1\\;11022\\;-2\"\,\"5\\;1\\;20000%' then '未知晶体兑换物资'
+when data like'%1\\;11023\\;-200\"\,\"5\\;1\\;20000%' then '残破的年代物兑换物资'
+end as item
+from ods.flow
+where gn='shipgirl'
+and ds ='2020-11-26'
+and method='shop.BuyGoods') a
+left join  mysql_db.water_roles b 
+on a.pid=b.pid and a.server_id=b.server_id
+where b.pid is null
+group by a.server_id,a.pid,item) c
+where item is not null;" >>buybuy40.txt
+
+-----------------------------------------------------------------------------
+## 兑换次数
+
+select item,count(*) people
+from(
+select a.server_id,a.pid,item,count(*) number
+from(
+select server_id,pid,
+case when data like'%1\\;11022\\;-5\"\,\"5\\;9\\;50%' then '高级装备兑换币'
+when data like'%1\\;11022\\;-30\"\,\"2\\;30581\\;1%' then '万能奥斯装备核心'
+when data like'%1\\;11022\\;-10\"\,\"1\\;168111\\;1%' then '深海回廊活动勋章'
+when data like'%1\\;11023\\;-15\"\,\"5\\;8\\;100%' then '装备兑换币'
+when data like'%1\\;11023\\;-15\"\,\"5\\;24\\;150%' then '舰队币'
+when data like'%1\\;11023\\;-15\"\,\"5\\;18\\;300%' then '功勋'
+when data like'%1\\;11023\\;-200\"\,\"1\\;10304\\;1%' then '奥斯机关拓展单元巡洋'
+when data like'%1\\;11023\\;-200\"\,\"1\\;10305\\;1%' then '奥斯机关拓展单元战列'
+when data like'%1\\;11023\\;-200\"\,\"1\\;10306\\;1%' then '奥斯机关拓展单元航母'
+when data like'%1\\;11023\\;-200\"\,\"1\\;10307\\;1%' then '奥斯机关拓展单元驱逐'
+when data like'%1\\;11022\\;-2\"\,\"5\\;1\\;20000%' then '未知晶体兑换物资'
+when data like'%1\\;11023\\;-200\"\,\"5\\;1\\;20000%' then '残破的年代物兑换物资'
+end as item
+from ods.flow
+where gn='shipgirl'
+and ds >='2020-11-26'
+and ds <='2020-12-09'
+and method='shop.BuyGoods') a
+left join  mysql_db.water_roles b 
+on a.pid=b.pid and a.server_id=b.server_id
+where b.pid is null
+group by a.server_id,a.pid,item) c
+where item is not null
+group by item;
+
+------------------------------------------------------------------------------------------
+
+需求2：
+
+抽卡角色数：
+
+select count(*)
+from(
+SELECT server_id,pid
+from ods.flow
+WHERE gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+and method='buildship.BuildShip'
+and split(kv,',')[0]=109
+GROUP BY server_id,pid) a 
+left join (
+select server_id,pid
+from  mysql_db.water_roles 
+where if_water=1) b
+on a.pid=b.pid and a.server_id=b.server_id
+where b.pid is null;
+
+----------------------------------------------------------------------------------------------
+抽卡总次数：
+
+select sum(num) total
+from(
+SELECT server_id,pid,split(kv,',')[size(split(kv,','))-3] as num
+from ods.flow
+WHERE gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+and method='buildship.BuildShip'
+and split(kv,',')[0]=109
+) a 
+left join (
+select server_id,pid
+from  mysql_db.water_roles 
+where if_water=1) b 
+on a.pid=b.pid and a.server_id=b.server_id
+where b.pid is null;
+
+
+-------------------------------------------------------------------------------------------
+
+##活跃用户：
+
+select count(distinct a.server_id,a.pid)
+from(
+select substr(role_uid,0,length(role_uid)-7) pid, server_id
+from dwb.new_active_role
+where gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10') a
+left join (
+select server_id,pid
+from  mysql_db.water_roles 
+where if_water=1) b
+on a.server_id=b.server_id and a.pid=b.pid
+where b.server_id is null;
+
+-----------------------------------------------------------------------------------------------
+
+##18级以上活跃用户：
+
+
+select count(*)
+from(
+select substr(role_uid,0,length(role_uid)-7) pid, server_id
+from dwb.new_active_role
+where gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+group by substr(role_uid,0,length(role_uid)-7),server_id) a
+join(
+select cast(server_id as int) server_id,cast(pid as int) pid
+from dim.shipgirl_dms_userinfo 
+where cast(level as int) >= 18
+group by cast(server_id as int),cast(pid as int)) c
+on a.pid=c.pid and a.server_id=c.server_id
+left join (
+select server_id,pid
+from  mysql_db.water_roles 
+where if_water=1) b
+on a.server_id=b.server_id and a.pid=b.pid
+where b.server_id is null;
+
+
+------------------------------------------------------------------------------------------------
+
+##付费活跃用户：
+
+select count(distinct a.server_id,a.pid)
+from(
+select substr(role_uid,0,length(role_uid)-7) pid, server_id
+from dwb.new_active_role
+where gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+group by substr(role_uid,0,length(role_uid)-7),server_id) a
+join(
+select cast(group_id as int) server_id,cast(pid as int) pid
+from dim.shipgirl_t_ioshunfu_order_copy
+where gn='shipgirl'
+group by cast(group_id as int),cast(pid as int)) c
+on a.pid=c.pid and a.server_id=c.server_id
+left join(
+select server_id,pid
+from  mysql_db.water_roles 
+where if_water=1) b
+on a.server_id=b.server_id and a.pid=b.pid
+where b.server_id is null;
+
+---------------------------------------------------------------------------------------------
+需求3：
+
+## 首次获得单战姬抽卡数：
+
+
+hive -e"
+set mapreduce.map.memory.mb=8192;
+set mapreduce.reduce.memory.mb=8192;
+set mapred.child.java.opts=-Xmx3584m;
+set hive.cli.print.header=true;
+set hive.resultset.use.unique.column.names=false;
+select a.server_id,a.pid,sum(num) number
+from(
+SELECT server_id,pid,split(kv,',')[size(split(kv,','))-3] as num,log_time time
+from ods.flow
+WHERE gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+and method='buildship.BuildShip'
+and split(kv,',')[0]=109) a 
+join 
+(SELECT server_id,pid, min(log_time) first
+from ods.flow
+WHERE gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+and method='buildship.BuildShip'
+and data like'%\;20530511\;%'
+group by server_id,pid) b 
+on a.server_id=b.server_id and a.pid=b.pid
+left join (
+select server_id,pid
+from  mysql_db.water_roles 
+where if_water=1)  c
+on b.pid=c.pid and b.server_id=c.server_id
+where c.pid is null
+and time<=first
+group by a.server_id,a.pid
+order by pid" >>/tmp/first.txt
+
+--------------------------------------------------------------------------
+
+## 单战姬总抽卡数:
+
+
+hive -e"
+set mapreduce.map.memory.mb=8192;
+set mapreduce.reduce.memory.mb=8192;
+set mapred.child.java.opts=-Xmx3584m;
+set hive.cli.print.header=true;
+set hive.resultset.use.unique.column.names=false;
+select a.server_id,a.pid,sum(num) number
+from(
+SELECT server_id,pid,split(kv,',')[size(split(kv,','))-3] as num
+from ods.flow
+WHERE gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+and method='buildship.BuildShip'
+and split(kv,',')[0]=109) a 
+join 
+(SELECT server_id,pid
+from ods.flow
+WHERE gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+and method='buildship.BuildShip'
+and data like'%\;20530511\;%'
+group by server_id,pid) b 
+on a.server_id=b.server_id and a.pid=b.pid
+left join (
+select server_id,pid
+from  mysql_db.water_roles 
+where if_water=1)  c
+on b.pid=c.pid and b.server_id=c.server_id
+where c.pid is null
+group by a.server_id,a.pid
+order by pid;" >>/tmp/total.txt
+
+
+-----------------------------------------------------------------------------
+
+## 首次获得双战姬抽卡数：
+
+hive -e"
+set mapreduce.map.memory.mb=8192;
+set mapreduce.reduce.memory.mb=8192;
+set mapred.child.java.opts=-Xmx3584m;
+set hive.cli.print.header=true;
+set hive.resultset.use.unique.column.names=false;
+select f.server_id,f.pid,sum(num) number
+from(
+SELECT server_id,pid,split(kv,',')[size(split(kv,','))-3] as num,log_time time
+from ods.flow
+WHERE gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+and method='buildship.BuildShip'
+and split(kv,',')[0]=109) f
+join 
+(select d.server_id,d.pid,first,first_2,arr[0] as firstall
+from(
+select c.server_id,c.pid,first,first_2,sort_array(array(first,first_2)) arr 
+from(
+select a.server_id,a.pid,first,first_2
+from(
+SELECT server_id,pid, min(log_time) first
+from ods.flow
+WHERE gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+and method='buildship.BuildShip'
+and data like '%\;20140411\;%'
+group by server_id,pid) a
+join(
+SELECT server_id,pid, min(log_time) first_2
+from ods.flow
+WHERE gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+and method='buildship.BuildShip'
+and data like '%\;20530511\;%'
+group by server_id,pid) b
+on b.pid=a.pid and b.server_id=a.server_id) c) d) e
+on f.server_id=e.server_id and f.pid=e.pid
+left join (
+select server_id,pid
+from  mysql_db.water_roles 
+where if_water=1)  g
+on e.pid=g.pid and e.server_id=g.server_id
+where g.pid is null
+and time<=firstall
+group by f.server_id,f.pid
+order by pid" >>/tmp/2ssrfirst.txt
+
+-----------------------------------------------------------------------------
+
+## 双战姬总抽卡数:
+
+hive -e"
+set mapreduce.map.memory.mb=8192;
+set mapreduce.reduce.memory.mb=8192;
+set mapred.child.java.opts=-Xmx3584m;
+set hive.cli.print.header=true;
+set hive.resultset.use.unique.column.names=false;
+select a.server_id,a.pid,sum(num) number
+from(
+SELECT server_id,pid,split(kv,',')[size(split(kv,','))-3] as num
+from ods.flow
+WHERE gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+and method='buildship.BuildShip'
+and split(kv,',')[0]=109) a 
+join 
+(SELECT e.server_id,e.pid
+from(
+SELECT server_id,pid
+from ods.flow
+WHERE gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+and method='buildship.BuildShip'
+and data like '%\;20140411\;%'
+group by server_id,pid) e
+join(
+SELECT server_id,pid
+from ods.flow
+WHERE gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+and method='buildship.BuildShip'
+and data like '%\;20530511\;%'
+group by server_id,pid) f 
+on e.pid=f.pid and e.server_id=f.server_id) b 
+on a.server_id=b.server_id and a.pid=b.pid
+left join (
+select server_id,pid
+from  mysql_db.water_roles 
+where if_water=1)  c
+on b.pid=c.pid and b.server_id=c.server_id
+where c.pid is null
+group by a.server_id,a.pid
+order by pid" >>/tmp/total2ssr.txt
+
+-----------------------------------------------------------------------------
+
+##拥有战姬角色数：
+
+
+
+hive -e"
+set mapreduce.map.memory.mb=8192;
+set mapreduce.reduce.memory.mb=8192;
+set mapred.child.java.opts=-Xmx3584m;
+set hive.cli.print.header=true;
+set hive.resultset.use.unique.column.names=false;
+select a.server_id,a.pid,count(*) num
+from(
+SELECT server_id,pid
+from ods.flow
+WHERE gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+and method='buildship.BuildShip'
+and data like'%\;20140411\;%') a
+left join (
+select server_id,pid
+from  mysql_db.water_roles 
+where if_water=1) b
+on b.pid=a.pid and b.server_id=a.server_id
+where b.pid is null
+group by a.server_id,a.pid" >>/tmp/1ssr.txt
+
+
+-----------------------------------------------------------------------------
+hive -e"
+set mapreduce.map.memory.mb=8192;
+set mapreduce.reduce.memory.mb=8192;
+set mapred.child.java.opts=-Xmx3584m;
+set hive.cli.print.header=true;
+set hive.resultset.use.unique.column.names=false;
+select a.server_id,a.pid,count(*) num
+from(
+SELECT server_id,pid
+from ods.flow
+WHERE gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+and method='buildship.BuildShip'
+and data like'%\;20530511\;%') a
+left join (
+select server_id,pid
+from  mysql_db.water_roles 
+where if_water=1) b
+on b.pid=a.pid and b.server_id=a.server_id
+where b.pid is null
+group by a.server_id,a.pid" >>/tmp/11ssr.txt
+
+-------------------------------------------------------------------------------
+
+##拥有双战姬角色数：
+
+
+hive -e"
+set mapreduce.map.memory.mb=8192;
+set mapreduce.reduce.memory.mb=8192;
+set mapred.child.java.opts=-Xmx3584m;
+set hive.cli.print.header=true;
+set hive.resultset.use.unique.column.names=false;
+select a.server_id,a.pid,arr[0] as numall
+from(
+select i.server_id,i.pid,num,num_2,sort_array(array(num,num_2)) arr 
+from(
+select f.server_id,f.pid,num,num_2
+from(
+SELECT server_id,pid,count(*) num
+from ods.flow
+WHERE gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+and method='buildship.BuildShip'
+and data like'%\;20140411\;%'
+group by server_id,pid) f
+join(
+SELECT server_id,pid,count(*) num_2
+from ods.flow
+WHERE gn='shipgirl'
+and ds >='2020-12-24'
+and ds <='2021-01-10'
+and method='buildship.BuildShip'
+and data like'%\;20530511\;%'
+group by server_id,pid) h
+on f.pid=h.pid and f.server_id=h.server_id) i) a
+left join (
+select server_id,pid
+from  mysql_db.water_roles 
+where if_water=1)  b
+on b.pid=a.pid and b.server_id=a.server_id
+where b.pid is null" >>/tmp/bothssr.txt
