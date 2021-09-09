@@ -1,5 +1,6 @@
 ####副本的伤害相关日志
 
+
 hive -e"
 select server_id,pid,ds,split(kv,'\,')[0]  copyid,
 split(kv,'\,')[3] shipgirl_battle,
