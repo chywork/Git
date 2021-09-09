@@ -1,5 +1,5 @@
-
 --vip活动商品售卖
+
 
 hive -e"
 select '7/12-7/15' daterange,t1.vip,'1' timerange,item_id,
